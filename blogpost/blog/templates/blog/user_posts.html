@@ -1,0 +1,62 @@
+{% extends "blog/base.html" %}
+{% block content %}
+<h1 class=" mb-3">
+    <font-face3>Posts By {{ view.kwargs.username }} ({{ page_obj.paginator.count }})</font-face3>
+    {% if user.is_authenticated %}
+    <div>
+        <button id="delete_button" class="btn-danger btn-sm "><i class="fa fa-trash-o"></i> Delete Selected
+            Posts</button>
+        <button id="cancel_button" class="btn-danger btn-sm"><i class="fa fa-times"></i> Cancel</button>
+    </div>
+    {% endif %}
+</h1>
+
+{% for blog in posts %}
+<article class="media content-section delete_post">
+    <img class="rounded-circle article-img" src="{{ blog.author.profile.image.url }}">
+    <div class="media-body">
+        <div class="article-metadata">
+            <a class="mr-2" href="{% url 'user-posts' blog.author.username %}">
+                <font-face2>{{ blog.author }}</font-face2>
+            </a>
+            <small class="text-muted">
+                <font-face2>{{ blog.date_posted|date:"F d, Y - D" }}</font-face2>
+            </small>
+        </div>
+        <h2><a class="article-title" href="{% url 'post-detail' blog.id %}">{{ blog.title }}</a>
+            {% if user.is_authenticated %}
+            {% if blog.author == user %}
+            <emsp>
+                <input type="checkbox" data-post_id='{{ blog.id }}' class="cbox check_for_delete" name="userpost"
+                    id="userpost">
+            </emsp>
+            {% endif %}
+            {% endif %}
+        </h2>
+        <p class="article-content">{{ blog.content }}</p>
+    </div>
+</article>
+{% endfor %}
+
+{% if is_paginated %}
+
+{% if page_obj.has_previous %}
+<a class="btn btn-outline-info mb-4" href="?page=1">First</a>
+<a class="btn btn-outline-info mb-4" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+{% endif %}
+
+{% for num in page_obj.paginator.page_range %}
+{% if page_obj.number == num %}
+<a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
+{% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+<a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
+{% endif %}
+{% endfor %}
+
+{% if page_obj.has_next %}
+<a class="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Next</a>
+<a class="btn btn-outline-info mb-4" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+{% endif %}
+
+{% endif %}
+{% endblock content %}

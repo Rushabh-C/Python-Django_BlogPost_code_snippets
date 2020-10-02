@@ -1,0 +1,141 @@
+{% load static %}
+{% csrf_token %}
+<html>
+
+<head>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+
+    <!-- New Bootstrap Icons Using Font-awesome -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'blog/main.css' %}">
+
+    {% if title %}
+    <title>Blog Post - {{ title }}</title>
+    {% else %}
+    <title>Blog Post</title>
+    {% endif %}
+
+</head>
+
+<body>
+    <header class="site-header">
+        <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
+            <div class="container">
+                <a class="navbar-brand mr-4" href="{% url 'blog-home' %}">
+                    <font-face>Blog Post</font-face>
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle"
+                    aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarToggle">
+                    <div class="navbar-nav mr-auto">
+                        <a class="nav-item nav-link" href="{% url 'blog-home' %}">
+                            <font-face>Home <i class="fa fa-home"></i></font-face>
+                        </a>
+                        <a class="nav-item nav-link" href="{% url 'blog-about' %}">
+                            <font-face>About</font-face>
+                        </a>
+                    </div>
+                    <!-- Navbar Right Side -->
+                    <div class="navbar-nav">
+                        {% if user.is_authenticated %}
+                        <a class="nav-item nav-link" href="{% url 'post-create' %}">
+                            <font-face><i class="fa fa-pencil"></i> Create Post</font-face>
+                        </a>
+                        <a class="nav-item nav-link" href="{% url 'profile' %}">
+                            <font-face>Profile <i class="fa fa-user"></i></font-face>
+                        </a>
+                        <a class="nav-item nav-link" href="{% url 'logout' %}">
+                            <font-face>Logout <i class="fa fa-power-off"></i></font-face>
+                        </a>
+                        {% else %}
+                        <a class="nav-item nav-link" href="{% url 'login' %}">
+                            <font-face>Login</font-face>
+                        </a>
+                        <a class="nav-item nav-link" href="{% url 'register' %}">
+                            <font-face>Register</font-face>
+                        </a> {% endif %}
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main role="main" class="container">
+        <div class="row">
+            <div class="col-md-12">
+                {% if messages %} {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% block content %}
+
+                {% endblock content %}
+            </div>
+        </div>
+    </main>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+</body>
+<script>
+    var posts = [];
+    $(document).ready(function () {
+        console.log('in');
+        $('.check_for_delete').css('display', 'none');
+        $('#delete_button').css('display', 'none');
+        $('#cancel_button').css('display', 'none');
+    });
+    $(".delete_post").click(function () {
+        $('.check_for_delete').css('display', 'block');
+        $('#delete_button').css('display', 'block');
+        $('#cancel_button').css('display', 'block');
+    });
+    $("#cancel_button").click(function () {
+        $('.check_for_delete').css('display', 'none');
+        $('#delete_button').css('display', 'none');
+        $('#cancel_button').css('display', 'none');
+    });
+    $(".check_for_delete").click(function () {
+        var post_id = $(this).attr("data-post_id");
+        posts.push(post_id);
+    });
+    $("#delete_button").click(function () {
+        console.log(posts);
+        $.ajax({
+            url: "{% url 'delete-post' %}",
+            type: "POST",
+            data: { 'posts': JSON.stringify(posts) },
+            headers: {'X-CSRFToken': '{{ csrf_token }}' },
+            success: function (data) {
+                console.log(data.status);
+                var url = '/user/' + '{{user}}';
+                console.log(url);
+                window.location.replace(url);
+            }
+        });
+    });
+</script>
+
+</html>
